@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Pretty Efficient — Professional home organizing by Kim Graves. Serving the DFW area." />
+  <title>Pretty Efficient | Home Organizing by Kim Graves</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream:   #FAF7F2;
+      --warm:    #F3EDE3;
+      --sand:    #E8DFD0;
+      --stone:   #C4B8A8;
+      --bark:    #7A6A58;
+      --ink:     #2C2420;
+      --sage:    #8FA68C;
+      --blush:   #D4A898;
+      --gold:    #B8956A;
+      --gold-lt: #EAD9C2;
+      --white:   #FFFFFF;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Jost', sans-serif;
+      background: var(--cream);
+      color: var(--ink);
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3, h4 {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 600;
+      line-height: 1.1;
+    }
+
+    img { display: block; max-width: 100%; }
+    a { color: inherit; text-decoration: none; }
+
+    /* ── Nav ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 5vw;
+      height: 72px;
+      background: rgba(250,247,242,0.92);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--sand);
+      transition: background 0.3s;
+    }
+
+    .nav-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 22px; font-weight: 700; letter-spacing: 0.04em;
+      color: var(--ink);
+    }
+    .nav-logo span { color: var(--gold); }
+
+    .nav-links { display: flex; gap: 36px; list-style: none; }
+    .nav-links a {
+      font-size: 13px; font-weight: 500; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--bark);
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--gold); }
+
+    .nav-cta {
+      background: var(--ink); color: var(--cream) !important;
+      padding: 9px 22px; border-radius: 30px;
+      font-size: 12px !important; font-weight: 600 !important;
+      letter-spacing: 0.1em !important;
+      transition: background 0.2s !important;
+    }
+    .nav-cta:hover { background: var(--gold) !important; color: var(--white) !important; }
+
+    .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px; }
+    .hamburger span { width: 24px; height: 2px; background: var(--ink); border-radius: 2px; transition: 0.3s; }
+
+    /* ── Hero ── */
+    #hero {
+      min-height: 100svh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      padding-top: 72px;
+    }
+
+    .hero-text {
+      display: flex; flex-direction: column; justify-content: center;
+      padding: 80px 6vw 80px 8vw;
+    }
+
+    .hero-eyebrow {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--gold);
+      margin-bottom: 20px;
+    }
+
+    .hero-h1 {
+      font-size: clamp(48px, 6vw, 80px);
+      color: var(--ink); margin-bottom: 24px;
+      line-height: 1.0;
+    }
+    .hero-h1 em { font-style: italic; color: var(--gold); }
+
+    .hero-p {
+      font-size: 17px; font-weight: 300; line-height: 1.75;
+      color: var(--bark); max-width: 440px; margin-bottom: 40px;
+    }
+
+    .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
+
+    .btn-primary {
+      background: var(--ink); color: var(--cream);
+      padding: 14px 32px; border-radius: 30px;
+      font-family: 'Jost', sans-serif; font-size: 13px; font-weight: 600;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      border: none; cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+      display: inline-block;
+    }
+    .btn-primary:hover { background: var(--gold); transform: translateY(-2px); }
+
+    .btn-outline {
+      background: transparent; color: var(--ink);
+      padding: 13px 32px; border-radius: 30px;
+      font-family: 'Jost', sans-serif; font-size: 13px; font-weight: 600;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      border: 1.5px solid var(--sand); cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+      display: inline-block;
+    }
+    .btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+
+    .hero-image {
+      position: relative; overflow: hidden;
+      background: var(--warm);
+    }
+    .hero-image img {
+      width: 100%; height: 100%; object-fit: cover;
+      transition: transform 6s ease;
+    }
+    .hero-image:hover img { transform: scale(1.04); }
+
+    .hero-badge {
+      position: absolute; bottom: 40px; left: -20px;
+      background: var(--white); border-radius: 16px;
+      padding: 16px 22px; box-shadow: 0 8px 32px rgba(44,36,32,0.14);
+      display: flex; align-items: center; gap: 14px;
+      animation: slideIn 0.8s 0.4s both;
+    }
+    @keyframes slideIn { from { opacity:0; transform: translateX(-20px); } to { opacity:1; transform: translateX(0); } }
+    .badge-icon { font-size: 28px; }
+    .badge-num { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 700; color: var(--ink); line-height: 1; }
+    .badge-label { font-size: 11px; color: var(--bark); letter-spacing: 0.06em; margin-top: 2px; }
+
+    /* ── Section scaffolding ── */
+    section { padding: 100px 8vw; }
+    .section-eyebrow {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--gold); margin-bottom: 12px;
+    }
+    .section-h2 { font-size: clamp(36px, 4vw, 56px); color: var(--ink); margin-bottom: 20px; }
+    .section-lead { font-size: 17px; font-weight: 300; color: var(--bark); line-height: 1.7; max-width: 560px; }
+
+    /* ── About ── */
+    #about {
+      background: var(--white);
+      display: grid; grid-template-columns: 1fr 1fr; gap: 80px;
+      align-items: center;
+    }
+    .about-img-wrap {
+      position: relative;
+    }
+    .about-img-wrap img {
+      width: 100%; border-radius: 4px;
+      aspect-ratio: 4/5; object-fit: cover;
+    }
+    .about-img-accent {
+      position: absolute; bottom: -20px; right: -20px;
+      width: 60%; aspect-ratio: 1;
+      border: 3px solid var(--gold-lt); border-radius: 4px;
+      z-index: -1;
+    }
+    .about-text .section-lead { max-width: 100%; margin-bottom: 28px; }
+    .about-sig {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 32px; font-style: italic;
+      color: var(--gold); margin-top: 8px;
+    }
+
+    /* ── Services ── */
+    #services { background: var(--cream); }
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px; margin-top: 56px;
+    }
+    .service-card {
+      background: var(--white);
+      border-radius: 4px;
+      padding: 36px 28px;
+      border: 1px solid var(--sand);
+      transition: box-shadow 0.2s, transform 0.2s;
+      position: relative; overflow: hidden;
+    }
+    .service-card::before {
+      content: ''; position: absolute; top: 0; left: 0;
+      width: 3px; height: 100%;
+      background: var(--gold);
+      transform: scaleY(0); transform-origin: top;
+      transition: transform 0.3s;
+    }
+    .service-card:hover::before { transform: scaleY(1); }
+    .service-card:hover { box-shadow: 0 12px 40px rgba(44,36,32,0.1); transform: translateY(-4px); }
+    .service-icon { font-size: 32px; margin-bottom: 20px; }
+    .service-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 24px; font-weight: 600;
+      color: var(--ink); margin-bottom: 12px;
+    }
+    .service-desc { font-size: 14px; font-weight: 300; color: var(--bark); line-height: 1.7; }
+
+    /* ── Portfolio / gallery from Supabase ── */
+    #portfolio { background: var(--warm); }
+    .portfolio-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 48px; flex-wrap: wrap; gap: 20px; }
+    .portfolio-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 3px;
+    }
+    .portfolio-item {
+      position: relative; aspect-ratio: 1;
+      overflow: hidden; cursor: pointer; background: var(--sand);
+    }
+    .portfolio-item img,
+    .portfolio-item video {
+      width: 100%; height: 100%; object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+    .portfolio-item:hover img,
+    .portfolio-item:hover video { transform: scale(1.06); }
+    .portfolio-overlay {
+      position: absolute; inset: 0;
+      background: rgba(44,36,32,0); 
+      display: flex; align-items: flex-end; padding: 16px;
+      transition: background 0.3s;
+    }
+    .portfolio-item:hover .portfolio-overlay { background: rgba(44,36,32,0.45); }
+    .portfolio-caption {
+      color: #fff; font-size: 13px; font-weight: 400;
+      opacity: 0; transform: translateY(8px);
+      transition: opacity 0.3s, transform 0.3s;
+      line-height: 1.4;
+    }
+    .portfolio-item:hover .portfolio-caption { opacity: 1; transform: translateY(0); }
+
+    /* Placeholder tiles while loading */
+    .portfolio-placeholder {
+      aspect-ratio: 1; background: var(--sand);
+      animation: shimmer 1.4s infinite;
+    }
+    @keyframes shimmer {
+      0%,100% { opacity: 0.5; } 50% { opacity: 0.9; }
+    }
+
+    /* ── Instagram feed ── */
+    #instagram { background: var(--cream); text-align: center; padding: 80px 8vw; }
+    .ig-handle {
+      display: inline-flex; align-items: center; gap: 10px;
+      font-size: 17px; font-weight: 500; color: var(--bark);
+      margin-bottom: 40px;
+      padding: 12px 24px; border-radius: 30px;
+      border: 1.5px solid var(--sand);
+      transition: border-color 0.2s;
+    }
+    .ig-handle:hover { border-color: var(--gold); color: var(--gold); }
+    .ig-icon { width: 22px; height: 22px; }
+
+    /* Instagram embed grid */
+    .ig-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 3px; margin-bottom: 32px;
+    }
+    .ig-post {
+      aspect-ratio: 1; overflow: hidden;
+      background: var(--sand); position: relative;
+    }
+    .ig-post iframe {
+      width: 100%; height: 100%;
+      border: none; pointer-events: none;
+      transform: scale(1.02);
+    }
+
+    /* ── Testimonials from Supabase ── */
+    #testimonials { background: var(--ink); }
+    #testimonials .section-eyebrow { color: var(--gold); }
+    #testimonials .section-h2 { color: var(--cream); }
+    .reviews-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 24px; margin-top: 56px;
+    }
+    .review-card {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 4px; padding: 32px 28px;
+      transition: background 0.2s;
+    }
+    .review-card:hover { background: rgba(255,255,255,0.1); }
+    .stars { color: var(--gold); font-size: 16px; letter-spacing: 2px; margin-bottom: 18px; }
+    .review-quote {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 19px; font-style: italic;
+      color: rgba(250,247,242,0.9); line-height: 1.6;
+      margin-bottom: 20px;
+    }
+    .review-author { font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--stone); }
+
+    /* ── Contact ── */
+    #contact {
+      background: var(--warm);
+      display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start;
+    }
+    .contact-form { display: flex; flex-direction: column; gap: 16px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-group { display: flex; flex-direction: column; gap: 7px; }
+    .form-label { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--bark); }
+    .form-input {
+      padding: 13px 16px; border: 1.5px solid var(--sand);
+      border-radius: 4px; background: var(--white);
+      font-family: 'Jost', sans-serif; font-size: 15px; color: var(--ink);
+      outline: none; transition: border-color 0.2s;
+      width: 100%;
+    }
+    .form-input:focus { border-color: var(--gold); }
+    textarea.form-input { min-height: 120px; resize: vertical; }
+    .form-submit {
+      background: var(--ink); color: var(--cream);
+      padding: 15px; border-radius: 30px;
+      font-family: 'Jost', sans-serif; font-size: 13px; font-weight: 600;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      border: none; cursor: pointer;
+      transition: background 0.2s;
+      margin-top: 8px;
+    }
+    .form-submit:hover { background: var(--gold); }
+    .form-success {
+      display: none; padding: 18px; background: #F0FDF4;
+      border: 1px solid #86EFAC; border-radius: 4px;
+      color: #15803D; font-size: 14px; text-align: center;
+    }
+
+    .contact-info { padding-top: 8px; }
+    .contact-info .section-lead { margin-bottom: 36px; }
+    .contact-detail {
+      display: flex; align-items: center; gap: 14px;
+      margin-bottom: 18px; font-size: 15px; color: var(--bark);
+    }
+    .contact-detail-icon { font-size: 20px; flex-shrink: 0; }
+
+    /* ── Footer ── */
+    footer {
+      background: var(--ink); color: rgba(250,247,242,0.5);
+      padding: 40px 8vw;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 16px;
+    }
+    .footer-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 20px; font-weight: 700; color: var(--cream);
+    }
+    .footer-logo span { color: var(--gold); }
+    footer p { font-size: 13px; }
+    .footer-ig {
+      display: flex; align-items: center; gap: 8px;
+      color: rgba(250,247,242,0.6); font-size: 13px;
+      transition: color 0.2s;
+    }
+    .footer-ig:hover { color: var(--gold); }
+
+    /* ── Mobile ── */
+    @media (max-width: 768px) {
+      #hero { grid-template-columns: 1fr; min-height: auto; }
+      .hero-text { padding: 60px 6vw 40px; order: 2; }
+      .hero-image { height: 60vw; order: 1; }
+      .hero-badge { bottom: 20px; left: 10px; }
+      #about { grid-template-columns: 1fr; gap: 40px; }
+      .about-img-accent { display: none; }
+      .services-grid { grid-template-columns: 1fr; }
+      .portfolio-grid { grid-template-columns: repeat(2, 1fr); }
+      .reviews-grid { grid-template-columns: 1fr; }
+      .ig-grid { grid-template-columns: repeat(2, 1fr); }
+      #contact { grid-template-columns: 1fr; gap: 40px; }
+      .form-row { grid-template-columns: 1fr; }
+      .nav-links { display: none; }
+      .hamburger { display: flex; }
+      section { padding: 60px 6vw; }
+    }
+
+    /* Fade-in on scroll */
+    .fade-up {
+      opacity: 0; transform: translateY(28px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .fade-up.visible { opacity: 1; transform: translateY(0); }
+
+    /* Stagger children */
+    .stagger > * { opacity: 0; transform: translateY(20px); transition: opacity 0.5s, transform 0.5s; }
+    .stagger.visible > *:nth-child(1) { opacity:1; transform:none; transition-delay:0s; }
+    .stagger.visible > *:nth-child(2) { opacity:1; transform:none; transition-delay:0.1s; }
+    .stagger.visible > *:nth-child(3) { opacity:1; transform:none; transition-delay:0.2s; }
+    .stagger.visible > *:nth-child(4) { opacity:1; transform:none; transition-delay:0.3s; }
+    .stagger.visible > *:nth-child(5) { opacity:1; transform:none; transition-delay:0.4s; }
+    .stagger.visible > *:nth-child(6) { opacity:1; transform:none; transition-delay:0.5s; }
+  </style>
+</head>
+<body>
+
+  <!-- ── Navigation ── -->
+  <nav>
+    <div class="nav-logo">Pretty <span>Efficient</span></div>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#services">Services</a></li>
+      <li><a href="#portfolio">Portfolio</a></li>
+      <li><a href="#testimonials">Reviews</a></li>
+      <li><a href="#contact" class="nav-cta">Free Phone Consult</a></li>
+    </ul>
+    <div class="hamburger" onclick="toggleMenu()">
+      <span></span><span></span><span></span>
+    </div>
+  </nav>
+
+  <!-- ── Hero ── -->
+  <section id="hero">
+    <div class="hero-text">
+      <p class="hero-eyebrow">DFW Home Organizing</p>
+      <h1 class="hero-h1">A space for <em>every</em> thing &amp; every thing in its place.</h1>
+      <p class="hero-p">Kim Graves helps busy families transform cluttered, overwhelming spaces into calm, functional homes they actually love living in.</p>
+      <div class="hero-actions">
+        <a href="#contact" class="btn-primary">Free Phone Consult</a>
+        <a href="#portfolio" class="btn-outline">See the Work</a>
+      </div>
+    </div>
+    <div class="hero-image">
+      <!-- Placeholder hero image — replace with a real photo of Kim's work -->
+      <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=900&q=80&auto=format&fit=crop"
+           alt="Beautifully organized kitchen pantry" loading="eager" />
+      <div class="hero-badge">
+        <div class="badge-icon">✦</div>
+        <div>
+          <div class="badge-num">100%</div>
+          <div class="badge-label">Client satisfaction</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── About ── -->
+  <section id="about">
+    <div class="about-img-wrap fade-up">
+      <!-- Replace with a real photo of Kim -->
+      <img src="kim.jpg"
+           alt="Kim Graves, owner of Pretty Efficient" />
+      <div class="about-img-accent"></div>
+    </div>
+    <div class="about-text fade-up">
+      <p class="section-eyebrow">Meet Kim</p>
+      <h2 class="section-h2">Organized spaces, calmer lives.</h2>
+      <p class="section-lead">
+        Hi, I'm Kim Graves — the heart behind Pretty Efficient. I've always believed that
+        your home should be as efficient as the life you're trying to live in it. When your space is organized,
+        everything else gets a little easier: mornings run smoother, stress drops, and you
+        finally have room to breathe.
+      </p>
+      <p class="section-lead" style="margin-top:16px;">
+        I take on each project with warmth, zero judgment, and a whole lot of energy.
+        Whether it's a pantry overhaul or a whole-home reset, I'll be right there with you
+        — rolling up my sleeves and making it happen.
+      </p>
+      <div class="about-sig">Kim Graves</div>
+      <a href="https://instagram.com/prettyefficientorg" target="_blank" rel="noopener"
+         style="display:inline-flex;align-items:center;gap:8px;margin-top:24px;font-size:13px;color:var(--bark);font-weight:500;letter-spacing:0.06em;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+        @prettyefficientorg
+      </a>
+    </div>
+  </section>
+
+  <!-- ── Services ── -->
+  <section id="services">
+    <div class="fade-up">
+      <p class="section-eyebrow">What I Do</p>
+      <h2 class="section-h2">Every space, transformed.</h2>
+      <p class="section-lead">From a single chaotic drawer to a full home reset — no project is too small or too big.</p>
+    </div>
+    <div class="services-grid stagger">
+      <div class="service-card">
+        <div class="service-icon">🍽</div>
+        <div class="service-title">Kitchen & Pantry</div>
+        <p class="service-desc">Label systems, bin solutions, and smart layouts that make cooking and meal prep effortless.</p>
+      </div>
+      <div class="service-card">
+        <div class="service-icon">👗</div>
+        <div class="service-title">Closets & Wardrobes</div>
+        <p class="service-desc">Seasonal rotations, space-saving systems, and a closet you'll actually want to open.</p>
+      </div>
+      <div class="service-card">
+        <div class="service-icon">🏠</div>
+        <div class="service-title">Whole-Home Organizing</div>
+        <p class="service-desc">A top-to-bottom approach for families ready to reclaim every room in the house.</p>
+      </div>
+      <div class="service-card">
+        <div class="service-icon">🗂</div>
+        <div class="service-title">Home Office & Paperwork</div>
+        <p class="service-desc">Filing systems, desk setups, and paper management that keeps you on top of everything.</p>
+      </div>
+      <div class="service-card">
+        <div class="service-icon">🚗</div>
+        <div class="service-title">Garage & Storage</div>
+        <p class="service-desc">Wall systems, zones, and smart storage so you can actually park in your garage again.</p>
+      </div>
+      <div class="service-card">
+        <div class="service-icon">📦</div>
+        <div class="service-title">Move-In / Move-Out</div>
+        <p class="service-desc">Start fresh in a new home with everything unpacked, organized, and exactly where it belongs.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Portfolio (Supabase-fed) ── -->
+  <section id="portfolio">
+    <div class="portfolio-header fade-up">
+      <div>
+        <p class="section-eyebrow">Before & After</p>
+        <h2 class="section-h2">The work speaks for itself.</h2>
+      </div>
+      <a href="https://instagram.com/prettyefficientorg" target="_blank" rel="noopener" class="btn-outline" style="font-size:12px;">
+        Follow on Instagram
+      </a>
+    </div>
+    <div class="portfolio-grid" id="portfolio-grid">
+      <!-- Placeholders -->
+      <div class="portfolio-placeholder"></div>
+      <div class="portfolio-placeholder"></div>
+      <div class="portfolio-placeholder"></div>
+      <div class="portfolio-placeholder"></div>
+      <div class="portfolio-placeholder"></div>
+      <div class="portfolio-placeholder"></div>
+    </div>
+  </section>
+
+  <!-- ── Instagram Feed ── -->
+  <section id="instagram">
+    <p class="section-eyebrow" style="text-align:center;">Follow Along</p>
+    <h2 class="section-h2" style="text-align:center;margin-bottom:8px;">Day-to-day on Instagram</h2>
+    <p style="text-align:center;color:var(--bark);font-size:15px;font-weight:300;margin-bottom:32px;">Real jobs, real spaces, real results.</p>
+    <a href="https://instagram.com/prettyefficientorg" target="_blank" rel="noopener" class="ig-handle">
+      <svg class="ig-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+      @prettyefficientorg
+    </a>
+
+    <!-- LightWidget embed for Instagram feed — free, no token needed -->
+    <script src="https://cdn.lightwidget.com/widgets/lightwidget.js"></script>
+    <iframe src="//lightwidget.com/widgets/011ef74ade9151cd884f5ed7db1eff36.html" scrolling="no" allowtransparency="true" class="lightwidget-widget" style="width:100%;border:0;overflow:hidden;"></iframe>
+  </section>
+
+  <!-- ── Testimonials (Supabase-fed) ── -->
+  <section id="testimonials">
+    <div class="fade-up">
+      <p class="section-eyebrow">Client Love</p>
+      <h2 class="section-h2">What clients are saying.</h2>
+    </div>
+    <div class="reviews-grid stagger" id="reviews-grid">
+      <!-- Loaded from Supabase; fallbacks below if empty -->
+    </div>
+  </section>
+
+  <!-- ── Contact ── -->
+  <section id="contact">
+    <div class="contact-info fade-up">
+      <p class="section-eyebrow">Get in Touch</p>
+      <h2 class="section-h2">Ready to get<br/>pretty efficient?</h2>
+      <p class="section-lead">
+        Fill out the form and Kim will get back to you within one business day to schedule
+        a free 15-minute phone consultation.
+      </p>
+      <div style="margin-top:36px;">
+        <div class="contact-detail">
+          <span class="contact-detail-icon">📍</span>
+          <span>DFW Metroplex, Texas</span>
+        </div>
+        <div class="contact-detail">
+          <a href="https://instagram.com/prettyefficientorg" target="_blank" class="contact-detail" style="display:flex;align-items:center;gap:14px;">
+            <span class="contact-detail-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+            </span>
+            <span>@prettyefficientorg</span>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="fade-up">
+      <form class="contact-form" onsubmit="submitForm(event)">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">First Name</label>
+            <input class="form-input" type="text" name="fname" required placeholder="Jane" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name</label>
+            <input class="form-input" type="text" name="lname" placeholder="Smith" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input class="form-input" type="email" name="email" placeholder="jane@example.com" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone</label>
+          <input class="form-input" type="tel" name="phone" placeholder="(214) 555-0000" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">What would you like help with?</label>
+          <textarea class="form-input" name="message" placeholder="Tell me a bit about your space and what's feeling overwhelming…"></textarea>
+        </div>
+        <button type="submit" class="form-submit" id="submit-btn">Send Message</button>
+        <div class="form-success" id="form-success">
+          ✓ Message sent! Kim will be in touch within one business day.
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- ── Footer ── -->
+  <footer>
+    <div class="footer-logo">Pretty <span>Efficient</span></div>
+    <p>© 2025 Pretty Efficient · Kim Graves · DFW, Texas</p>
+    <a href="https://instagram.com/prettyefficientorg" target="_blank" rel="noopener" class="footer-ig">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+      @prettyefficientorg
+    </a>
+  </footer>
+
+  <script>
+    // ── Supabase ──────────────────────────────────────────
+    const { createClient } = supabase
+    const sb = createClient(
+      'https://bfuunlrugixhqdjtzfre.supabase.co',
+      'sb_publishable_LzJglgvg_L9mGQwJIwE4SA_a-Kw8ZXC'
+    )
+
+    // ── Load portfolio from Supabase ──────────────────────
+    async function loadPortfolio() {
+      const { data } = await sb
+        .from('job_media')
+        .select('*, jobs(description, featured)')
+        .eq('show_on_website', true)
+        .order('created_at', { ascending: false })
+        .limit(12)
+
+      const grid = document.getElementById('portfolio-grid')
+
+      if (!data || data.length === 0) {
+        // Show placeholder tiles with a message
+        grid.innerHTML = `
+          <div style="grid-column:1/-1;padding:60px 20px;text-align:center;color:var(--bark);font-size:15px;font-style:italic;">
+            Portfolio photos will appear here once jobs are marked for the website in the Pretty Efficient app.
+          </div>`
+        return
+      }
+
+      grid.innerHTML = data.map(m => {
+        const url = sb.storage.from('job-media').getPublicUrl(m.storage_path).data.publicUrl
+        const caption = m.caption || m.jobs?.description || ''
+        const isVideo = m.media_type === 'video'
+        return `
+          <div class="portfolio-item">
+            ${isVideo
+              ? `<video src="${url}" muted playsinline loop preload="none"></video>`
+              : `<img src="${url}" alt="${caption}" loading="lazy" />`
+            }
+            <div class="portfolio-overlay">
+              <span class="portfolio-caption">${caption}</span>
+            </div>
+          </div>`
+      }).join('')
+
+      // Play videos on hover
+      document.querySelectorAll('.portfolio-item video').forEach(v => {
+        v.closest('.portfolio-item').addEventListener('mouseenter', () => v.play())
+        v.closest('.portfolio-item').addEventListener('mouseleave', () => { v.pause(); v.currentTime = 0 })
+      })
+    }
+
+    // ── Load testimonials from Supabase ──────────────────
+    const FALLBACK_REVIEWS = [
+      { quote: "Kim completely transformed my pantry in one afternoon. I keep opening the door just to look at it!", author: "Sarah M.", rating: 5 },
+      { quote: "She's so efficient and kind — not an ounce of judgment. My home office finally makes sense.", author: "Tom & Linda P.", rating: 5 },
+      { quote: "Worth every penny. I've tried to organize on my own for years. Kim did it in hours.", author: "Diane R.", rating: 5 },
+    ]
+
+    async function loadTestimonials() {
+      const { data } = await sb
+        .from('testimonials')
+        .select('*, customers(name)')
+        .eq('approved', true)
+        .order('created_at', { ascending: false })
+        .limit(6)
+
+      const reviews = (data && data.length > 0) ? data : FALLBACK_REVIEWS
+      const grid = document.getElementById('reviews-grid')
+
+      grid.innerHTML = reviews.map(r => `
+        <div class="review-card">
+          <div class="stars">${'★'.repeat(r.rating || 5)}</div>
+          <p class="review-quote">"${r.quote}"</p>
+          <div class="review-author">${r.customers?.name || r.author || 'Happy Client'}</div>
+        </div>
+      `).join('')
+
+      // Re-trigger stagger animation
+      grid.classList.add('stagger')
+      setTimeout(() => grid.classList.add('visible'), 100)
+    }
+
+    // ── Contact form → Supabase ───────────────────────────
+    async function submitForm(e) {
+      e.preventDefault()
+      const btn = document.getElementById('submit-btn')
+      btn.textContent = 'Sending…'
+      btn.disabled = true
+
+      const fd = new FormData(e.target)
+      const name = `${fd.get('fname')} ${fd.get('lname')}`.trim()
+
+      const { error } = await sb.from('inquiries').insert({
+        name,
+        email: fd.get('email') || null,
+        phone: fd.get('phone') || null,
+        message: fd.get('message') || null,
+        status: 'New'
+      })
+
+      if (error) {
+        btn.textContent = 'Try again'
+        btn.disabled = false
+        alert('Something went wrong. Please try again.')
+        return
+      }
+
+      e.target.reset()
+      btn.style.display = 'none'
+      document.getElementById('form-success').style.display = 'block'
+    }
+
+    // ── Scroll animations ─────────────────────────────────
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target) } })
+    }, { threshold: 0.12 })
+
+    document.querySelectorAll('.fade-up, .stagger').forEach(el => observer.observe(el))
+
+    // ── Hamburger menu ────────────────────────────────────
+    function toggleMenu() {
+      const links = document.querySelector('.nav-links')
+      const open = links.style.display === 'flex'
+      links.style.cssText = open
+        ? ''
+        : 'display:flex;flex-direction:column;position:absolute;top:72px;left:0;right:0;background:var(--cream);padding:24px 6vw;border-bottom:1px solid var(--sand);gap:20px;'
+    }
+
+    // ── Init ──────────────────────────────────────────────
+    loadPortfolio()
+    loadTestimonials()
+  </script>
+</body>
+</html>

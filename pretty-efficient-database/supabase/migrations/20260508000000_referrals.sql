@@ -1,0 +1,1 @@
+alter table leads add column referred_by_client_id uuid references clients(id) on delete set null;

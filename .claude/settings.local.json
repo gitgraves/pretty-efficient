@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(netlify deploy *)",
+      "Bash(supabase *)",
+      "PowerShell(Copy-Item *)",
+      "Bash(netlify status *)",
+      "Bash(npx supabase *)",
+      "Bash(node -e ' *)"
+    ]
+  }
+}
