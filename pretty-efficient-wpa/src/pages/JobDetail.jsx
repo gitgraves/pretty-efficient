@@ -54,7 +54,7 @@ export default function JobDetail({ jobId, clients, subcontractors, referralPart
   })
   const saveJob = async () => {
     setSaving(true)
-    const { error } = await upsertJob({ ...jobForm, revenue: parseFloat(jobForm.revenue) || 0 })
+    const { error } = await upsertJob({ ...jobForm, revenue: parseFloat(jobForm.revenue) || 0, job_date: jobForm.job_date || null })
     setSaving(false)
     if (error) return showToast(`Save failed: ${error.message}`, 'error')
     showToast('Saved')
