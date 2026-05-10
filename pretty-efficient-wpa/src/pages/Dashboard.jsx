@@ -19,7 +19,7 @@ export default function Dashboard({ jobs, upcomingConsults = [], onSelectJob, on
     }
   }, [jobs])
 
-  const recent = [...jobs].sort((a,b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 5)
+  const recent = [...jobs].sort((a,b) => (b.job_date || '').localeCompare(a.job_date || '')).slice(0, 5)
 
   return (
     <div style={{ padding: '24px 16px 100px' }}>
@@ -92,7 +92,7 @@ export default function Dashboard({ jobs, upcomingConsults = [], onSelectJob, on
 
       {/* Recent jobs */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-        <h2 style={{ fontSize: 20 }}>Recent Jobs</h2>
+        <h2 style={{ fontSize: 20 }}>Latest Jobs</h2>
       </div>
 
       {recent.length === 0 ? (
