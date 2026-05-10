@@ -33,9 +33,6 @@ jobs:
       - name: Build PWA
         run: cd pretty-efficient-wpa && npm ci && npm run build
 
-      - name: Add website to build output
-        run: cp -r pretty-efficient-website pretty-efficient-wpa/dist/website
-
       - name: Configure Pages
         uses: actions/configure-pages@v4
 
