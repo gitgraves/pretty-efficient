@@ -56,7 +56,7 @@ export default function JobDetail({ jobId, clients, subcontractors, referralPart
     setSaving(true)
     const { error } = await upsertJob({ ...jobForm, revenue: parseFloat(jobForm.revenue) || 0 })
     setSaving(false)
-    if (error) return showToast('Save failed', 'error')
+    if (error) return showToast(`Save failed: ${error.message}`, 'error')
     showToast('Saved')
     setJobForm(null)
     reload()
