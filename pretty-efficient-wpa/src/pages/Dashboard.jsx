@@ -25,7 +25,7 @@ export default function Dashboard({ jobs, onSelectJob, onNewJob }) {
     <div style={{ padding: '24px 16px 100px' }}>
       {/* Header */}
       <div style={{ marginBottom: 28 }}>
-        <h1 style={{ fontSize: 30, color: 'var(--ink)', lineHeight: 1.1 }}>Pretty<br/>Efficient</h1>
+        <h1 style={{ fontSize: 26, color: 'var(--ink)', whiteSpace: 'nowrap' }}>Pretty Efficient</h1>
         <p style={{ color: 'var(--ink3)', marginTop: 6, fontSize: 14 }}>Home Organizing</p>
       </div>
 
