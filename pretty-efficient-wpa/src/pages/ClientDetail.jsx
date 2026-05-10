@@ -1,6 +1,25 @@
 import { useState, useEffect } from 'react'
-import { fmt$, fmtDate, StatusBadge, Field, inputSx, Spinner, useToast, Toast } from '../components/ui.jsx'
-import { getClient, upsertClient, deleteClient } from '../lib/supabase.js'
+import { fmt$, fmtDate, StatusBadge, Field, inputSx, selectSx, Spinner, Modal, useToast, Toast, ConfirmDialog } from '../components/ui.jsx'
+import { getClient, upsertClient, deleteClient, upsertConsultation, deleteConsultation } from '../lib/supabase.js'
+
+const CONSULT_STATUSES = ['Scheduled', 'Completed', 'No-Show', 'Declined', 'Converted']
+
+const CSTY = {
+  'Scheduled': { bg: '#EEF2FF', text: '#4338CA' },
+  'Completed': { bg: '#F0FDF4', text: '#15803D' },
+  'No-Show':   { bg: '#FFF7ED', text: '#C2410C' },
+  'Declined':  { bg: '#F4F4F5', text: '#52525B' },
+  'Converted': { bg: '#FEFCE8', text: '#A16207' },
+}
+
+function ConsultBadge({ status }) {
+  const s = CSTY[status] || CSTY['Scheduled']
+  return (
+    <span style={{ background: s.bg, color: s.text, borderRadius: 20, padding: '2px 8px', fontSize: 11, fontWeight: 700 }}>
+      {status}
+    </span>
+  )
+}
 
 export default function ClientDetail({ clientId, onBack, onSelectJob, onNewJob, onRefresh }) {
   const [client, setClient] = useState(null)
@@ -9,6 +28,8 @@ export default function ClientDetail({ clientId, onBack, onSelectJob, onNewJob, 
   const [form, setForm] = useState({})
   const [saving, setSaving] = useState(false)
   const [toast, showToast] = useToast()
+  const [consultModal, setConsultModal] = useState(null)
+  const [consultConfirm, setConsultConfirm] = useState(null)
 
   const load = async () => {
     setLoading(true)
@@ -32,10 +53,44 @@ export default function ClientDetail({ clientId, onBack, onSelectJob, onNewJob, 
     onRefresh()
   }
 
+  const saveConsult = async () => {
+    setSaving(true)
+    const payload = {
+      ...consultModal,
+      client_id: clientId,
+      fee: parseFloat(consultModal.fee) || 0,
+      consult_date: consultModal.consult_date || null,
+    }
+    const { error } = await upsertConsultation(payload)
+    setSaving(false)
+    if (error) return showToast('Save failed', 'error')
+    showToast('Consultation saved')
+    setConsultModal(null)
+    load()
+    onRefresh()
+  }
+
+  const handleDeleteConsult = async () => {
+    const { error } = await deleteConsultation(consultConfirm.id)
+    setConsultConfirm(null)
+    if (error) return showToast('Delete failed', 'error')
+    showToast('Consultation deleted')
+    load()
+    onRefresh()
+  }
+
+  const handleConvertConsult = async (c) => {
+    setSaving(true)
+    await upsertConsultation({ ...c, status: 'Converted' })
+    setSaving(false)
+    onNewJob(clientId)
+  }
+
   if (loading) return <div style={{ padding: 24 }}><Spinner /></div>
   if (!client) return <div style={{ padding: 24 }}>Client not found.</div>
 
   const jobs = client.jobs || []
+  const consults = (client.consultations || []).slice().sort((a, b) => (a.consult_date || '').localeCompare(b.consult_date || ''))
   const totalRevenue = jobs.reduce((s, j) => s + (j.revenue || 0), 0)
   const completedJobs = jobs.filter(j => j.status === 'Completed').length
 
@@ -111,6 +166,49 @@ export default function ClientDetail({ clientId, onBack, onSelectJob, onNewJob, 
         )}
       </div>
 
+      {/* Consultations */}
+      <div style={{ background: '#fff', borderRadius: 16, padding: 18, border: '1px solid var(--border)', boxShadow: 'var(--shadow)', marginBottom: 16 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+          <h3 style={{ fontSize: 17, fontFamily: 'Playfair Display, serif', fontWeight: 700 }}>Consultations</h3>
+          <button onClick={() => setConsultModal({ consult_date: '', consult_time: '', fee: '0', fee_collected: false, status: 'Scheduled', notes: '' })}
+            style={{ color: 'var(--gold)', fontWeight: 600, fontSize: 14 }}>+ Schedule</button>
+        </div>
+
+        {consults.length === 0 ? (
+          <p style={{ color: 'var(--ink3)', fontSize: 14, textAlign: 'center', padding: '8px 0' }}>No consultations yet</p>
+        ) : (
+          consults.map(c => (
+            <div key={c.id} style={{ padding: '12px 0', borderBottom: '1px solid var(--border)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3, flexWrap: 'wrap' }}>
+                    <span style={{ fontWeight: 600, fontSize: 14 }}>{fmtDate(c.consult_date)}</span>
+                    {c.consult_time && <span style={{ fontSize: 13, color: 'var(--ink3)' }}>{c.consult_time}</span>}
+                    <ConsultBadge status={c.status} />
+                  </div>
+                  {c.fee > 0 && (
+                    <div style={{ fontSize: 13, color: 'var(--gold)', fontWeight: 700 }}>
+                      {fmt$(c.fee)}{c.fee_collected ? <span style={{ color: 'var(--sage)', fontWeight: 500, marginLeft: 4 }}>· collected</span> : <span style={{ color: 'var(--rose)', fontWeight: 500, marginLeft: 4 }}>· not yet collected</span>}
+                    </div>
+                  )}
+                  {c.notes && <p style={{ fontSize: 13, color: 'var(--ink2)', marginTop: 4, lineHeight: 1.4 }}>{c.notes}</p>}
+                </div>
+                <div style={{ display: 'flex', gap: 8, flexShrink: 0, marginLeft: 12 }}>
+                  <button onClick={() => setConsultModal({ ...c, fee: c.fee?.toString() || '0' })} style={{ color: 'var(--ink3)', fontSize: 13 }}>Edit</button>
+                  <button onClick={() => setConsultConfirm(c)} style={{ color: 'var(--rose)', fontSize: 13 }}>✕</button>
+                </div>
+              </div>
+              {(c.status === 'Scheduled' || c.status === 'Completed') && (
+                <button onClick={() => handleConvertConsult(c)}
+                  style={{ background: 'var(--gold)', color: 'var(--ink)', borderRadius: 20, padding: '5px 14px', fontSize: 12, fontWeight: 700 }}>
+                  Convert to Job
+                </button>
+              )}
+            </div>
+          ))
+        )}
+      </div>
+
       {/* Job history */}
       <div style={{ background: '#fff', borderRadius: 16, padding: 18, border: '1px solid var(--border)', boxShadow: 'var(--shadow)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
@@ -140,6 +238,43 @@ export default function ClientDetail({ clientId, onBack, onSelectJob, onNewJob, 
           ))
         )}
       </div>
+
+      {/* ── Consultation Modal ── */}
+      {consultModal && (
+        <Modal title={consultModal.id ? 'Edit Consultation' : 'Schedule Consultation'} onClose={() => setConsultModal(null)} onSave={saveConsult} saving={saving}>
+          <Field label="Date">
+            <input type="date" value={consultModal.consult_date || ''} onChange={e => setConsultModal(f => ({...f, consult_date: e.target.value}))} style={inputSx} />
+          </Field>
+          <Field label="Time">
+            <input type="text" value={consultModal.consult_time || ''} onChange={e => setConsultModal(f => ({...f, consult_time: e.target.value}))} style={inputSx} placeholder="e.g. 2:00 PM" />
+          </Field>
+          <Field label="Consultation Fee ($)">
+            <input type="number" step="0.01" min="0" value={consultModal.fee || '0'} onChange={e => setConsultModal(f => ({...f, fee: e.target.value}))} style={inputSx} />
+          </Field>
+          <Field label="Status">
+            <select value={consultModal.status || 'Scheduled'} onChange={e => setConsultModal(f => ({...f, status: e.target.value}))} style={selectSx}>
+              {CONSULT_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+          </Field>
+          <Field label="Fee Collected">
+            <label style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 15, cursor: 'pointer' }}>
+              <input type="checkbox" checked={!!consultModal.fee_collected} onChange={e => setConsultModal(f => ({...f, fee_collected: e.target.checked}))} style={{ width: 18, height: 18 }} />
+              Fee collected
+            </label>
+          </Field>
+          <Field label="Notes">
+            <textarea value={consultModal.notes || ''} onChange={e => setConsultModal(f => ({...f, notes: e.target.value}))} style={{...inputSx, minHeight: 70, resize: 'vertical'}} placeholder="Any notes about this consultation…" />
+          </Field>
+        </Modal>
+      )}
+
+      {consultConfirm && (
+        <ConfirmDialog
+          msg={`Delete the ${fmtDate(consultConfirm.consult_date)} consultation?`}
+          onConfirm={handleDeleteConsult}
+          onCancel={() => setConsultConfirm(null)}
+        />
+      )}
 
       {toast && <Toast msg={toast.msg} type={toast.type} />}
     </div>

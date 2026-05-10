@@ -12,7 +12,8 @@ export const getClients = () =>
 export const getClient = (id) =>
   supabase.from('clients').select(`
     *,
-    jobs(id, description, status, job_date, revenue, created_at)
+    jobs(id, description, status, job_date, revenue, created_at),
+    consultations(id, status, consult_date, consult_time, fee, fee_collected, notes, lead_id, converted_job_id, created_at)
   `).eq('id', id).single()
 
 export const upsertClient = (data) =>
@@ -108,7 +109,11 @@ export const deleteJobSubcontractor = (id) =>
 
 // ── Leads (formerly inquiries) ─────────────────────────
 export const getLeads = () =>
-  supabase.from('leads').select('*, referral_partner:referral_partners!referral_partner_id(id, name, organization)').order('created_at', { ascending: false })
+  supabase.from('leads').select(`
+    *,
+    referral_partner:referral_partners!referral_partner_id(id, name, organization),
+    consultations(id, status, consult_date, consult_time, fee, fee_collected, notes, created_at)
+  `).order('created_at', { ascending: false })
 
 // ── Referral Partners ──────────────────────────────────
 export const getReferralPartners = () =>
@@ -123,6 +128,20 @@ export const upsertReferralPartner = (data) =>
 
 export const deleteReferralPartner = (id) =>
   supabase.from('referral_partners').delete().eq('id', id)
+
+// ── Consultations ──────────────────────────────────────
+export const getUpcomingConsultations = () =>
+  supabase.from('consultations')
+    .select('*, clients(id, name), leads(id, name)')
+    .eq('status', 'Scheduled')
+    .gte('consult_date', new Date().toISOString().slice(0, 10))
+    .order('consult_date')
+
+export const upsertConsultation = (data) =>
+  supabase.from('consultations').upsert(data).select().single()
+
+export const deleteConsultation = (id) =>
+  supabase.from('consultations').delete().eq('id', id)
 
 export const upsertLead = (data) =>
   supabase.from('leads').upsert(data).select().single()

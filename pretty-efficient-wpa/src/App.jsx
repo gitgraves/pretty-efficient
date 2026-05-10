@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { getJobs, getClients, getSubcontractors, getReferralPartners } from './lib/supabase.js'
+import { getJobs, getClients, getSubcontractors, getReferralPartners, getUpcomingConsultations } from './lib/supabase.js'
 import { Spinner } from './components/ui.jsx'
 import Dashboard from './pages/Dashboard.jsx'
 import Jobs from './pages/Jobs.jsx'
@@ -24,6 +24,7 @@ export default function App() {
   const [clients, setClients] = useState([])
   const [subcontractors, setSubcontractors] = useState([])
   const [referralPartners, setReferralPartners] = useState([])
+  const [upcomingConsults, setUpcomingConsults] = useState([])
   const [loading, setLoading] = useState(true)
   const [selectedJobId, setSelectedJobId] = useState(null)
   const [selectedClientId, setSelectedClientId] = useState(null)
@@ -31,13 +32,14 @@ export default function App() {
   const [newJobClientId, setNewJobClientId] = useState(null)
 
   const loadData = useCallback(async () => {
-    const [{ data: jobData }, { data: clientData }, { data: subData }, { data: partnerData }] = await Promise.all([
-      getJobs(), getClients(), getSubcontractors(), getReferralPartners()
+    const [{ data: jobData }, { data: clientData }, { data: subData }, { data: partnerData }, { data: consultData }] = await Promise.all([
+      getJobs(), getClients(), getSubcontractors(), getReferralPartners(), getUpcomingConsultations()
     ])
     setJobs(jobData || [])
     setClients(clientData || [])
     setSubcontractors(subData || [])
     setReferralPartners(partnerData || [])
+    setUpcomingConsults(consultData || [])
     setLoading(false)
   }, [])
 
@@ -93,7 +95,7 @@ export default function App() {
         />
       ) : (
         <>
-          {tab === 'dashboard' && <Dashboard jobs={jobs} onSelectJob={handleSelectJob} onNewJob={handleNewJob} />}
+          {tab === 'dashboard' && <Dashboard jobs={jobs} upcomingConsults={upcomingConsults} onSelectJob={handleSelectJob} onNewJob={handleNewJob} onSelectClient={handleSelectClient} />}
           {tab === 'jobs'      && <Jobs jobs={jobs} onSelectJob={handleSelectJob} onNewJob={handleNewJob} />}
           {tab === 'clients'   && <Clients clients={clients} jobs={jobs} onSelectClient={handleSelectClient} />}
           {tab === 'leads'     && <Leads clients={clients} onRefresh={loadData} onSelectClient={handleSelectClient} />}

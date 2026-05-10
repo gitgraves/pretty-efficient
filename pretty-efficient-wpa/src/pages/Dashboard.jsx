@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { fmt$, fmtDate, StatusBadge } from '../components/ui.jsx'
 
-export default function Dashboard({ jobs, onSelectJob, onNewJob }) {
+export default function Dashboard({ jobs, upcomingConsults = [], onSelectJob, onNewJob, onSelectClient }) {
   const stats = useMemo(() => {
     const totalRevenue = jobs.reduce((s, j) => s + (j.revenue || 0), 0)
     const totalExpenses = jobs.reduce((s, j) => {
@@ -56,6 +56,39 @@ export default function Dashboard({ jobs, onSelectJob, onNewJob }) {
           </div>
         ))}
       </div>
+
+      {/* Upcoming Consultations */}
+      {upcomingConsults.length > 0 && (
+        <div style={{ marginBottom: 28 }}>
+          <h2 style={{ fontSize: 20, marginBottom: 14 }}>Upcoming Consultations</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {upcomingConsults.map(c => {
+              const name = c.clients?.name || c.leads?.name || 'Unknown'
+              return (
+                <div key={c.id}
+                  onClick={() => c.client_id && onSelectClient(c.client_id)}
+                  style={{
+                    background: '#fff', borderRadius: 14, padding: '14px 16px',
+                    border: '1px solid var(--border)', boxShadow: 'var(--shadow)',
+                    cursor: c.client_id ? 'pointer' : 'default',
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12
+                  }}
+                >
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: 14 }}>{name}</div>
+                    <div style={{ fontSize: 12, color: 'var(--ink3)', marginTop: 2 }}>
+                      {fmtDate(c.consult_date)}{c.consult_time ? ` · ${c.consult_time}` : ''}
+                    </div>
+                  </div>
+                  {c.fee > 0 && (
+                    <div style={{ fontWeight: 700, color: 'var(--gold)', fontSize: 14, flexShrink: 0 }}>{fmt$(c.fee)}</div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Recent jobs */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
